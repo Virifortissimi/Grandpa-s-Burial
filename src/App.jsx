@@ -9,30 +9,49 @@ import {
   Heart,
   Image as ImageIcon,
   MapPin,
+  Menu,
   Music,
   Pause,
   Play,
   Send,
-  Users
+  Settings,
+  Users,
+  X
 } from 'lucide-react';
+import { memorialImages } from './memorialImages';
 
 const backgroundAudioSrc = '/audio/our-joy-eternally.mp3';
+const zoomMeetingUrl =
+  'https://us06web.zoom.us/j/83071682622?pwd=RgcmA8otBkC9RuAp2NKovocWs5n4Kw.1';
+const zoomChatUrl = 'https://us06web.zoom.us/launch/jc/83071682622';
+const zoomInstructionsUrl =
+  'https://us06web.zoom.us/meetings/83071682622/invitations?signature=ysXP6QFpFHPC4AQsDvkGThsdXVYOmBAMTNWa_VZ3aCI';
+const imagesPerGalleryPage = 20;
+const fallbackHeroImages = [
+  '/images/memorial-bible.png',
+  '/images/memorial-hall.png',
+  '/images/memorial-family.png'
+];
+const heroImageSources =
+  memorialImages.length > 0
+    ? memorialImages.slice(0, 3).map((image) => image.src)
+    : fallbackHeroImages;
 
 const heroSlides = [
   {
-    image: '/images/memorial-bible.png',
+    image: heroImageSources[0] || fallbackHeroImages[0],
     eyebrow: 'In Loving Memory of',
-    title: 'Julius Oladimaji Omowaye',
+    title: 'Julius Oladimeji Omowaye',
     text: 'October 20, 1951 - February 21, 2026'
   },
   {
-    image: '/images/memorial-hall.png',
-    eyebrow: 'Memorial Service',
+    image: heroImageSources[1] || heroImageSources[0] || fallbackHeroImages[1],
+    eyebrow: 'Burial Talk',
     title: 'Saturday, August 15, 2026',
     text: '11:00 AM Nigeria / 11:00 AM UK / 5:00 AM US Central / 8:00 PM Australia'
   },
   {
-    image: '/images/memorial-family.png',
+    image: heroImageSources[2] || heroImageSources[0] || fallbackHeroImages[2],
     eyebrow: 'A Legacy of Faith',
     title: 'Remembered With Love',
     text: 'A husband, father, shepherd, mentor, and loyal servant of Jehovah.'
@@ -50,7 +69,7 @@ const navItems = [
 const serviceDetails = [
   {
     icon: CalendarDays,
-    title: 'Memorial Service',
+    title: 'Burial Talk',
     lines: [
       'Saturday, August 15, 2026',
       '11:00 AM Nigeria / 11:00 AM UK / 5:00 AM US Central / 8:00 PM Australia (AEST)'
@@ -63,8 +82,8 @@ const serviceDetails = [
   },
   {
     icon: Clock,
-    title: 'Viewing',
-    lines: ['Zoom link will be available soon.']
+    title: 'Virtual Attendance',
+    lines: ['Zoom access details are provided below.']
   }
 ];
 
@@ -133,20 +152,29 @@ const songs = [
   }
 ];
 
-const galleryImages = Array.from({ length: 12 }, (_, index) => {
-  const sources = ['/images/memorial-bible.png', '/images/memorial-hall.png', '/images/memorial-family.png'];
-  return {
-    src: sources[index % sources.length],
-    title: `Memory ${index + 1}`,
-    note: 'Replace this placeholder with a family picture.'
-  };
-});
+const galleryImages =
+  memorialImages.length > 3 ? memorialImages.slice(3) : memorialImages;
 
 function App() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [galleryPage, setGalleryPage] = useState(1);
+  const [navOpen, setNavOpen] = useState(false);
+  const [accessOpen, setAccessOpen] = useState(false);
+  const [themeMode, setThemeMode] = useState(() => {
+    try {
+      return localStorage.getItem('themeMode') || 'system';
+    } catch {
+      return 'system';
+    }
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
+  const [accessibility, setAccessibility] = useState({
+    largeText: false,
+    highContrast: false,
+    reduceMotion: false
+  });
   const [guestEntries, setGuestEntries] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('guestEntries') || '[]');
@@ -158,16 +186,77 @@ function App() {
   const songRefs = useRef([]);
 
   useEffect(() => {
+    if (accessibility.reduceMotion) return;
+
     const timer = window.setInterval(() => {
       setActiveSlide((current) => (current + 1) % heroSlides.length);
     }, 6500);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [accessibility.reduceMotion]);
+
+  useEffect(() => {
+    const selectors = [
+      '.intro-band',
+      '.section',
+      '.detail-card',
+      '.watch-panel',
+      '.quote-panel',
+      '.story-block',
+      '.gallery-item',
+      '.song-card',
+      '.guest-form',
+      '.entries',
+      '.acknowledgments',
+      '.site-footer'
+    ].join(',');
+    const targets = Array.from(document.querySelectorAll(selectors));
+
+    if (accessibility.reduceMotion || !('IntersectionObserver' in window)) {
+      targets.forEach((target) => target.classList.add('is-visible'));
+      return undefined;
+    }
+
+    targets.forEach((target) => target.classList.add('reveal-target'));
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -48px 0px' }
+    );
+
+    targets.forEach((target) => observer.observe(target));
+
+    return () => observer.disconnect();
+  }, [accessibility.reduceMotion, galleryPage, guestEntries.length]);
 
   useEffect(() => {
     localStorage.setItem('guestEntries', JSON.stringify(guestEntries));
   }, [guestEntries]);
+
+  useEffect(() => {
+    localStorage.setItem('themeMode', themeMode);
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (!navOpen && !accessOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setNavOpen(false);
+        setAccessOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navOpen, accessOpen]);
 
   useEffect(() => {
     if (selectedImageIndex === null) return;
@@ -187,24 +276,47 @@ function App() {
     if (!audio) return;
 
     audio.volume = 0.35;
-    const playAttempt = audio.play();
+    const tryPlayBackground = () => {
+      if (songRefs.current.some((songAudio) => songAudio && !songAudio.paused)) return;
 
-    if (playAttempt?.catch) {
-      playAttempt
-        .then(() => {
-          setIsPlaying(true);
-          setAudioBlocked(false);
-        })
-        .catch(() => {
-          setAudioBlocked(true);
-          setIsPlaying(false);
-        });
-    }
+      const playAttempt = audio.play();
+
+      if (playAttempt?.catch) {
+        playAttempt
+          .then(() => {
+            setIsPlaying(true);
+            setAudioBlocked(false);
+          })
+          .catch(() => {
+            setAudioBlocked(true);
+            setIsPlaying(false);
+          });
+      }
+    };
+
+    tryPlayBackground();
+
+    const interactionEvents = ['pointerdown', 'keydown', 'touchstart'];
+    interactionEvents.forEach((eventName) => {
+      window.addEventListener(eventName, tryPlayBackground, { once: true });
+    });
+
+    return () => {
+      interactionEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, tryPlayBackground);
+      });
+    };
   }, []);
 
   const currentSlide = heroSlides[activeSlide];
   const selectedImage =
     selectedImageIndex === null ? null : galleryImages[selectedImageIndex];
+  const totalGalleryPages = Math.max(1, Math.ceil(galleryImages.length / imagesPerGalleryPage));
+  const safeGalleryPage = Math.min(galleryPage, totalGalleryPages);
+  const visibleGalleryImages = galleryImages.slice(
+    (safeGalleryPage - 1) * imagesPerGalleryPage,
+    safeGalleryPage * imagesPerGalleryPage
+  );
 
   const nextSlide = () => setActiveSlide((current) => (current + 1) % heroSlides.length);
   const previousSlide = () =>
@@ -218,6 +330,9 @@ function App() {
     setSelectedImageIndex((current) =>
       current === null ? galleryImages.length - 1 : (current - 1 + galleryImages.length) % galleryImages.length
     );
+  const goToGalleryPage = (page) => {
+    setGalleryPage(Math.min(Math.max(page, 1), totalGalleryPages));
+  };
 
   const toggleAudio = async () => {
     const audio = audioRef.current;
@@ -255,6 +370,16 @@ function App() {
     });
   };
 
+  const toggleAccessibility = (setting) => {
+    setAccessibility((current) => ({
+      ...current,
+      [setting]: !current[setting]
+    }));
+  };
+
+  const activeAccessibilityCount =
+    Object.values(accessibility).filter(Boolean).length + (themeMode === 'system' ? 0 : 1);
+
   const handleGuestSubmit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -280,7 +405,17 @@ function App() {
   };
 
   return (
-    <div className="site-shell">
+    <div
+      className={[
+        'site-shell',
+        accessibility.largeText ? 'large-text' : '',
+        accessibility.highContrast ? 'high-contrast' : '',
+        accessibility.reduceMotion ? 'reduced-motion' : '',
+        `theme-${themeMode}`
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <audio
         ref={audioRef}
         src={backgroundAudioSrc}
@@ -291,17 +426,102 @@ function App() {
       />
 
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Julius Oladimaji Omowaye memorial home">
+        <a className="brand" href="#top" aria-label="Julius Oladimeji Omowaye memorial home">
           <span className="brand-mark">JO</span>
           <span>Julius Omowaye</span>
         </a>
-        <nav aria-label="Main navigation">
+        <nav
+          id="main-navigation"
+          className={navOpen ? 'nav-links open' : 'nav-links'}
+          aria-label="Main navigation"
+        >
           {navItems.map(([href, label]) => (
-            <a key={href} href={`#${href}`}>
+            <a key={href} href={`#${href}`} onClick={() => setNavOpen(false)}>
               {label}
             </a>
           ))}
         </nav>
+        <div className="nav-actions">
+          <div className="access-menu">
+            <button
+              className="access-toggle"
+              type="button"
+              onClick={() => {
+                setAccessOpen((current) => !current);
+                setNavOpen(false);
+              }}
+              aria-expanded={accessOpen}
+              aria-controls="accessibility-menu"
+              aria-label="Open accessibility options"
+            >
+              <Settings size={18} />
+              <span>Access</span>
+              {activeAccessibilityCount > 0 && <small>{activeAccessibilityCount}</small>}
+            </button>
+            <div
+              id="accessibility-menu"
+              className={accessOpen ? 'accessibility-panel open' : 'accessibility-panel'}
+              aria-label="Accessibility options"
+            >
+              <div>
+                <Settings size={18} />
+                <strong>Accessibility</strong>
+              </div>
+              <fieldset className="theme-options">
+                <legend>Theme</legend>
+                {['light', 'dark', 'system'].map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    className={themeMode === mode ? 'active' : ''}
+                    onClick={() => setThemeMode(mode)}
+                    aria-pressed={themeMode === mode}
+                  >
+                    {mode[0].toUpperCase() + mode.slice(1)}
+                  </button>
+                ))}
+              </fieldset>
+              <button
+                type="button"
+                className={accessibility.largeText ? 'active' : ''}
+                onClick={() => toggleAccessibility('largeText')}
+                aria-pressed={accessibility.largeText}
+              >
+                Larger Text
+              </button>
+              <button
+                type="button"
+                className={accessibility.highContrast ? 'active' : ''}
+                onClick={() => toggleAccessibility('highContrast')}
+                aria-pressed={accessibility.highContrast}
+              >
+                High Contrast
+              </button>
+              <button
+                type="button"
+                className={accessibility.reduceMotion ? 'active' : ''}
+                onClick={() => toggleAccessibility('reduceMotion')}
+                aria-pressed={accessibility.reduceMotion}
+              >
+                Reduce Motion
+              </button>
+            </div>
+          </div>
+          <button
+            className="nav-toggle"
+            type="button"
+            onClick={() => {
+              setNavOpen((current) => !current);
+              setAccessOpen(false);
+            }}
+            aria-expanded={navOpen}
+            aria-controls="main-navigation"
+            aria-label={navOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {navOpen ? <X size={22} /> : <Menu size={22} />}
+            <span>Menu</span>
+          </button>
+        </div>
       </header>
 
       <main id="top">
@@ -327,7 +547,7 @@ function App() {
             </div>
             {audioBlocked && (
               <p className="audio-note">
-                Your browser paused the music. Use Play Music to start the background audio.
+                Your browser paused autoplay. Use Play Music once to start the background audio.
               </p>
             )}
           </div>
@@ -354,7 +574,7 @@ function App() {
 
         <section className="intro-band">
           <div>
-            <p className="eyebrow">Julius Oladimaji Omowaye</p>
+            <p className="eyebrow">Julius Oladimeji Omowaye</p>
             <h2>A life remembered for faith, generosity, and loyal love.</h2>
           </div>
           <p>
@@ -366,8 +586,8 @@ function App() {
 
         <section id="watch" className="section">
           <div className="section-heading">
-            <p className="eyebrow">Memorial Services</p>
-            <h2>Service Details</h2>
+            <p className="eyebrow">Burial Talk</p>
+            <h2>Burial Details</h2>
           </div>
           <div className="detail-grid">
             {serviceDetails.map((detail) => {
@@ -387,12 +607,37 @@ function App() {
             <div>
               <p className="eyebrow">Available Virtual On</p>
               <h3>Zoom Live Stream</h3>
-              <p>Add the Zoom meeting link in `src/App.jsx` when it is ready.</p>
+              <p>
+                The family of the Omowayes invite you to the Burial Talk of their husband,
+                father, brother, grandfather, and great grandfather.
+              </p>
+              <dl className="zoom-details">
+                <div>
+                  <dt>Meeting ID</dt>
+                  <dd>830 7168 2622</dd>
+                </div>
+                <div>
+                  <dt>Passcode</dt>
+                  <dd>877114</dd>
+                </div>
+                <div>
+                  <dt>SIP</dt>
+                  <dd>83071682622@zoomcrc.com</dd>
+                </div>
+              </dl>
             </div>
-            <a className="button primary" href="#" aria-disabled="true">
-              <Play size={18} />
-              Zoom Link Coming Soon
-            </a>
+            <div className="zoom-actions">
+              <a className="button primary" href={zoomMeetingUrl} target="_blank" rel="noreferrer">
+                <Play size={18} />
+                Join Zoom Meeting
+              </a>
+              <a className="button secondary" href={zoomChatUrl} target="_blank" rel="noreferrer">
+                Meeting Chat
+              </a>
+              <a className="button secondary" href={zoomInstructionsUrl} target="_blank" rel="noreferrer">
+                Join Instructions
+              </a>
+            </div>
           </div>
         </section>
 
@@ -419,14 +664,14 @@ function App() {
         <section id="life-story" className="section story-section">
           <div className="section-heading">
             <p className="eyebrow">Life Story</p>
-            <h2>Julius Oladimaji Omowaye</h2>
+            <h2>Julius Oladimeji Omowaye</h2>
             <p>October 20, 1951 - February 21, 2026</p>
           </div>
 
           <div className="story-flow">
             <StoryBlock title="Early Life">
               <p>
-                Julius Oladimaji Omowaye was born on October 20, 1951, in Epe, Lagos State,
+                Julius Oladimeji Omowaye was born on October 20, 1951, in Epe, Lagos State,
                 Nigeria, to Papa Muyibi Alao Hamed and Mama Abidat Killa. He was the fourth
                 of eight children in a family of five boys and three girls.
               </p>
@@ -485,24 +730,48 @@ function App() {
           <div className="section-heading">
             <p className="eyebrow">Pictures to Remember</p>
             <h2>Memories of Julius</h2>
-            <p>Click any image for a full view. Replace these placeholders with family pictures.</p>
+            <p>Click any image for a full view.</p>
           </div>
           <div className="gallery-grid">
-            {galleryImages.map((image, index) => (
-              <button
-                className="gallery-item"
-                key={`${image.title}-${index}`}
-                type="button"
-                onClick={() => setSelectedImageIndex(index)}
-              >
-                <img src={image.src} alt={image.title} />
-                <span>
-                  <ImageIcon size={16} />
-                  {image.title}
-                </span>
-              </button>
-            ))}
+            {visibleGalleryImages.map((image, index) => {
+              const imageIndex = (safeGalleryPage - 1) * imagesPerGalleryPage + index;
+              return (
+                <button
+                  className="gallery-item"
+                  key={`${image.title}-${imageIndex}`}
+                  type="button"
+                  onClick={() => setSelectedImageIndex(imageIndex)}
+                >
+                  <img src={image.src} alt={image.title} />
+                  <span>
+                    <ImageIcon size={16} />
+                    View Photo
+                  </span>
+                </button>
+              );
+            })}
           </div>
+          {totalGalleryPages > 1 && (
+            <div className="pagination" aria-label="Gallery pagination">
+              <button
+                type="button"
+                onClick={() => goToGalleryPage(safeGalleryPage - 1)}
+                disabled={safeGalleryPage === 1}
+              >
+                Previous
+              </button>
+              <span>
+                Page {safeGalleryPage} of {totalGalleryPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => goToGalleryPage(safeGalleryPage + 1)}
+                disabled={safeGalleryPage === totalGalleryPages}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </section>
 
         <section className="section songs-section">
@@ -602,7 +871,7 @@ function App() {
       </main>
 
       <footer className="site-footer">
-        <p>In Loving Memory of Julius Oladimaji Omowaye</p>
+        <p>In Loving Memory of Julius Oladimeji Omowaye</p>
         <a href="#top">Back to top</a>
       </footer>
 
@@ -629,7 +898,7 @@ function App() {
             </button>
             <div className="modal-actions">
               <div>
-                <h3>{selectedImage.title}</h3>
+                <h3>Photo Memory</h3>
                 <p>
                   Picture {(selectedImageIndex ?? 0) + 1} of {galleryImages.length}.{' '}
                   {selectedImage.note}
