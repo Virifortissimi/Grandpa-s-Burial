@@ -155,6 +155,7 @@ function App() {
     }
   });
   const audioRef = useRef(null);
+  const songRefs = useRef([]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -224,6 +225,9 @@ function App() {
 
     if (audio.paused) {
       try {
+        songRefs.current.forEach((songAudio) => {
+          if (songAudio && !songAudio.paused) songAudio.pause();
+        });
         await audio.play();
         setIsPlaying(true);
         setAudioBlocked(false);
@@ -234,6 +238,21 @@ function App() {
       audio.pause();
       setIsPlaying(false);
     }
+  };
+
+  const handleSongPlay = (activeIndex) => {
+    const backgroundAudio = audioRef.current;
+    if (backgroundAudio && !backgroundAudio.paused) {
+      backgroundAudio.pause();
+      setIsPlaying(false);
+    }
+
+    songRefs.current.forEach((songAudio, index) => {
+      if (songAudio && index !== activeIndex && !songAudio.paused) {
+        songAudio.pause();
+        songAudio.currentTime = 0;
+      }
+    });
   };
 
   const handleGuestSubmit = (event) => {
@@ -492,7 +511,7 @@ function App() {
             <h2>Music for reflection</h2>
           </div>
           <div className="song-grid">
-            {songs.map((song) => (
+            {songs.map((song, index) => (
               <article className="song-card" key={song.src}>
                 <div>
                   <Music size={20} />
@@ -501,7 +520,15 @@ function App() {
                     <small>{song.subtitle}</small>
                   </span>
                 </div>
-                <audio controls preload="metadata" src={song.src}>
+                <audio
+                  ref={(element) => {
+                    songRefs.current[index] = element;
+                  }}
+                  controls
+                  preload="metadata"
+                  src={song.src}
+                  onPlay={() => handleSongPlay(index)}
+                >
                   <a href={song.src}>Play {song.title}</a>
                 </audio>
               </article>
