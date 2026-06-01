@@ -98,35 +98,35 @@ const orderOfService = [
 ];
 
 const children = [
-  'Elizabeth Abimbola Faluyi (spouse: Femi Faluyi)',
-  'Adebola Hamed (spouse: Oluwakemi Petinrin)',
-  'Hannah Okanlawon (spouse: Steve Okanlawon)',
-  'Isaac Hamed',
-  'Jonathan Hamed (spouse: Adesuwa Obazee)'
+  'Olufunmilayo Adepoju',
+  'Folusho Jayeola',
+  'Olatunde Omowaiye',
+  'Love Ojo',
+  'Faith George',
+  'Peace Ahens',
+  'Taiye Omowaiye (deceased)',
+  'Kehinde Okondo',
+  'Samuel Omowaiye',
+  'Oladapo Omowaiye'
 ];
 
-const grandchildren = [
-  'Alyson Hamed',
-  'Davina Okanlawon',
-  'Maya Beard-Hamed',
-  'Stephanie Okanlawon',
-  'Emma Hamed',
-  'Ethan Hamed'
+const familyDescendants = [
+  'Grandchildren: xxxxxxxxxxxxxxxx',
+  'Great-grandchildren: xxxxxxxxxxxxxxxx',
+  'Great-great-grandchildren: xxxxxxxxxxxxxxx'
 ];
 
 const congregations = [
-  'Bashua Congregation (Shomolu)',
-  'Debari Congregation (Shomolu)',
-  'Paradise Congregation (Odogunyan, Ikorodu)',
-  'East Fresno Congregation (Fresno, Texas)'
+  'Olorunshogo Congregation (Orimerunmu)',
+  'Waigbo Congregation (Mushin)',
+  'Mile 12 Congregation (Lagos)',
+  'Bata Congregation (Lagos)',
+  'Unity Congregation (Orimerunmu)'
 ];
 
-const servicePrivileges = [
-  'Regular pioneer service',
-  'Bethel service',
-  'Ministerial servant and elder responsibilities',
-  'Special pioneer and missionary service',
-  'Circuit work alongside a spouse'
+const spiritualDaughters = [
+  'Mojisola Ekpenyong',
+  'Nehocia Jacquet, whom he lovingly gave the Yoruba name Arinola Omopariola'
 ];
 
 const songs = [
@@ -664,63 +664,130 @@ function App() {
         <section id="life-story" className="section story-section">
           <div className="section-heading">
             <p className="eyebrow">Life Story</p>
-            <h2>Julius Oladimeji Omowaye</h2>
-            <p>October 20, 1951 - February 21, 2026</p>
+            <h2>Julius Oladimeji Omowaiye</h2>
+            <p>August 2, 1934 - February 15, 2026</p>
           </div>
 
           <div className="story-flow">
             <StoryBlock title="Early Life">
               <p>
-                Julius Oladimeji Omowaye was born on October 20, 1951, in Epe, Lagos State,
-                Nigeria, to Papa Muyibi Alao Hamed and Mama Abidat Killa. He was the fourth
-                of eight children in a family of five boys and three girls.
+                Julius Oladimeji Omowaiye was born on August 2, 1934, in Akure, Ondo State,
+                Nigeria, into a family deeply rooted in service to Jehovah. He was the second
+                child of Pa Ebenezer Omowaiye and Mrs. XXX Omowaiye, a devoted servant of
+                Jehovah who served as a city overseer in Akure and was among those who brought
+                the truth to the town.
               </p>
               <p>
-                After basic education and technical schooling, Julius continued developing his
-                skill through electrical and electronics courses. Many affectionately called
-                him "Engineer" because of his knowledge, ability, and generous training
-                of others.
+                His mother was blessed with three children: Omotola Adeboye (deceased),
+                Obafemi Omowaiye (deceased), and Joseph Omowaiye (deceased). After the
+                passing of his mother, his father remarried and the family grew; he is
+                survived by * Number of Siblings*. These experiences helped shape him into a
+                resilient, responsible, and deeply compassionate person who valued family and
+                unity.
               </p>
             </StoryBlock>
 
-            <StoryBlock title="Family Life">
+            <StoryBlock title="Work and Accomplishments">
               <p>
-                In 1971, Julius married the love of his life, Esther Modupe Hamed. Together
-                they built a warm and loving family blessed with five children.
+                From a young age, Julius Omowaiye showed a natural gift and interest in
+                building construction. After his basic education, he went on to learn civil
+                and structural construction at Awomolo Construction Company in Ibadan. He
+                became well known for his ability to look at complex building plans, understand
+                them deeply, and explain clearly what needed to be done to ensure strong and
+                safe building structures.
+              </p>
+              <p>
+                Julius Omowaiye began his career working alongside expatriates from Germany in
+                the construction industry for about three years. In 1973, with courage and
+                determination, he started his own company. Through diligence, dedication, and
+                tenacity, he became the CEO of J. Ola Omowaiye &amp; Brothers Limited and J.
+                Ola Omowaiye &amp; Sons Limited. His work was marked by excellence, integrity,
+                and a strong sense of accomplishment.
+              </p>
+            </StoryBlock>
+
+            <StoryBlock title="Marriage and Family">
+              <p>
+                Julius Omowaiye was survived by the love of his life, whom he married on June
+                15, 1969, Mojisola Omowaiye (nee Salako), the daughter of Pa Johnson Salako of
+                Imashai, Ogun State. Their marriage was filled with love, friendship, respect,
+                joy, and a shared dedication and loyalty to Jehovah.
+              </p>
+              <p>
+                As a loving husband, Julius Omowaiye was hardworking, humble, loving, and
+                deeply caring. He was a generous provider who always put his family first, and
+                he was known for his hospitality and willingness to help others. He was
+                intelligent, thoughtful, and always ready to teach and guide.
               </p>
               <List title="Children" items={children} />
-              <List title="Grandchildren" items={grandchildren} />
+              <List title="Family Descendants" items={familyDescendants} />
+            </StoryBlock>
+
+            <StoryBlock title="A Loving Father and Friend">
+              <p>
+                His children describe him as approachable, loving, protective, and a good
+                listener who always tried to understand things from their point of view. Daddy,
+                as he is fondly called by his children, was firm when needed and not afraid to
+                speak the truth, but he was always kind, discerning, and fair to all.
+              </p>
+              <p>
+                In addition, he lovingly cared for many family members, including cousins,
+                nieces, and nephews, just like his own children. They fondly describe him as
+                XXXXXXXXXXXXXXXX.
+              </p>
+              <List title="Spiritual Daughters" items={spiritualDaughters} />
+            </StoryBlock>
+
+            <StoryBlock title="His Character">
+              <p>
+                Julius Omowaiye had a gentle way about him. He was soft-spoken, empathetic,
+                friendly, and had a great sense of humor. He was also very knowledgeable and
+                always willing to learn new things. He believed that life is beautiful, should
+                be cherished as a gift from Jehovah, and should be enjoyed.
+              </p>
+              <p>
+                He treated everyone equally, regardless of background or status, and he
+                strongly believed in unity. He disliked prejudice and always encouraged peace
+                and unity. He also had a warm relationship with people in his community and was
+                always ready to guide, support, and uplift others.
+              </p>
             </StoryBlock>
 
             <StoryBlock title="His Spiritual Life">
               <p>
-                Julius was born into a Muslim family, and his father served as a religious
-                leader in the community. In 1974, after observing a colleague discussing the
-                Bible at work, he began studying with Jehovah's Witnesses.
+                Above all, Julius Omowaiye loved Jehovah. His life reflected a deep and
+                genuine appreciation for the truth. Like some faithful servants, he experienced
+                moments in life where he stepped away from the truth, but what stood out was
+                his humility and honesty in finding his way back to Jehovah's organization.
               </p>
               <p>
-                He dedicated his life to Jehovah and was baptized on February 9, 1975. His
-                faithful example influenced his wife, siblings, relatives, nephews, and many
-                others who came to know Jehovah through his encouragement.
-              </p>
-            </StoryBlock>
-
-            <StoryBlock title="Privileges and Responsibilities">
-              <p>
-                With the loving support of his wife Esther, Julius served as an elder and gave
-                himself willingly to congregation activities, convention dramas, Assembly Hall
-                committees, hospitality, and the preaching work.
+                From that point onward, his love for Jehovah and his dedication to spiritual
+                things became even more evident to all who knew him. Until his death, he served
+                faithfully as an elder in Olorunshogo Congregation (Orimerunmu) and supported
+                many congregations over the years.
               </p>
               <List title="Congregations Served" items={congregations} />
-              <List title="Family Privileges Encouraged" items={servicePrivileges} />
             </StoryBlock>
 
-            <StoryBlock title="A Legacy of Faith">
+            <StoryBlock title="Faithful Service and Hope">
               <p>
-                He will be remembered for his love for Jehovah, humility, kindness,
-                generosity, and loyal love for others. Though a brief illness caused him to
-                fall asleep in death, the family holds firmly to the Bible's resurrection
-                hope at John 5:28, 29.
+                Pa Julius Omowaiye was admired for his strong faith, dedication, and the way
+                he encouraged others spiritually. He also participated in convention dramas,
+                including the "Love Never Fails" convention in 2019, and handled several
+                convention assignments.
+              </p>
+              <p>
+                One of the things he often said was, "Never leave Jehovah. Serve Him with a
+                complete heart full of obedience." On Sunday, February 15, 2026, Pa Julius
+                Omowaiye fell asleep in death. Although he will be deeply missed and mourned by
+                friends and relatives, his family holds on to the resurrection hope and comfort
+                that Jehovah gives.
+              </p>
+              <p>
+                His family and friends derive comfort from one of his favourite scriptures,
+                James 4:8, which says, "Draw close to God, and he will draw close to you."
+                With this hope, they look forward to the beautiful time when they will welcome
+                him back in Paradise.
               </p>
             </StoryBlock>
           </div>
