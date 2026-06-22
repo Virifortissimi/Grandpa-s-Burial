@@ -32,26 +32,24 @@ const fallbackHeroImages = [
   '/images/memorial-hall.png',
   '/images/memorial-family.png'
 ];
-const heroImageSources =
-  memorialImages.length > 0
-    ? memorialImages.slice(0, 3).map((image) => image.src)
-    : fallbackHeroImages;
+const heroImageUrl =
+  'https://res.cloudinary.com/virifortissimi/image/upload/v1782161472/Gramps/ChatGPT_Image_Jun_22_2026_09_48_54_PM.png';
 
 const heroSlides = [
   {
-    image: heroImageSources[0] || fallbackHeroImages[0],
+    image: heroImageUrl,
     eyebrow: 'In Loving Memory of',
     title: 'Julius Oladimeji Omowaye',
     text: 'October 20, 1951 - February 21, 2026'
   },
   {
-    image: heroImageSources[1] || heroImageSources[0] || fallbackHeroImages[1],
+    image: heroImageUrl,
     eyebrow: 'Burial Talk',
     title: 'Saturday, August 15, 2026',
     text: '11:00 AM Nigeria / 11:00 AM UK / 5:00 AM US Central / 8:00 PM Australia'
   },
   {
-    image: heroImageSources[2] || heroImageSources[0] || fallbackHeroImages[2],
+    image: heroImageUrl,
     eyebrow: 'A Legacy of Faith',
     title: 'Remembered With Love',
     text: 'A husband, father, shepherd, mentor, and loyal servant of Jehovah.'
@@ -60,7 +58,6 @@ const heroSlides = [
 
 const navItems = [
   ['watch', 'Watch'],
-  ['guest-book', 'Guest Book'],
   ['life-story', 'Life Story'],
   ['pictures', 'Pictures'],
   ['acknowledgments', 'Acknowledgments']
@@ -111,9 +108,9 @@ const children = [
 ];
 
 const familyDescendants = [
-  'Grandchildren: xxxxxxxxxxxxxxxx',
-  'Great-grandchildren: xxxxxxxxxxxxxxxx',
-  'Great-great-grandchildren: xxxxxxxxxxxxxxx'
+  'Grandchildren: Olawale Damilare, Olabisi Temidayo, Ibiyinka Jayeola, Oluwafemi Jayeola, Oluwafunmilayo Jayeola, Mercy Gabriel, Oluwagbenga Jayeola, Praise Adepoju, Williams Okondo, Jedidiah Omowaye, Russel Omowaye, Harrison Okondo, Michael Ahens, Daniela Omowaye, Treasure Oladapo-Omowaye, Richard Oladapo-Omowaye, Ryan Omowaye',
+  'Great-grandchildren: Oreoluwa Precious, Blessing Anike, Emmanuel Damilare, Talwo Ayegbusi, Kehinde Ayegbusi, Tofunmi Damilare, Ayomide Jayeola, Olamide Jayeola, Ayomiposi Damilare, Testimony Ayegbusi, Eliana Gabriel, Iremide Jayeola, Olumide Jayeola',
+  'Great-great-grandchildren: Firefunmi Idowu, Adura Adegoke'
 ];
 
 const congregations = [
@@ -872,52 +869,6 @@ function App() {
           </div>
         </section>
 
-        <section id="guest-book" className="section guestbook-section">
-          <div className="section-heading">
-            <p className="eyebrow">Guest Book</p>
-            <h2>Share a message with the family</h2>
-          </div>
-          <div className="guestbook-layout">
-            <form className="guest-form" onSubmit={handleGuestSubmit}>
-              <label>
-                Your Name
-                <input name="name" type="text" placeholder="Enter your name" required />
-              </label>
-              <label>
-                Message
-                <textarea
-                  name="message"
-                  rows="5"
-                  placeholder="Share a memory, prayer, or word of comfort"
-                  required
-                />
-              </label>
-              <button className="button primary" type="submit">
-                <Send size={18} />
-                Add Message
-              </button>
-            </form>
-            <div className="entries">
-              {guestEntries.length === 0 ? (
-                <div className="empty-state">
-                  <Users size={28} />
-                  <p>Guest messages will appear here on this device.</p>
-                </div>
-              ) : (
-                guestEntries.map((entry, index) => (
-                  <article key={`${entry.name}-${index}`}>
-                    <p>{entry.message}</p>
-                    <footer>
-                      <strong>{entry.name}</strong>
-                      <span>{entry.date}</span>
-                    </footer>
-                  </article>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-
         <section id="acknowledgments" className="section acknowledgments">
           <div>
             <p className="eyebrow">Acknowledgments</p>
@@ -1002,9 +953,22 @@ function List({ title, items }) {
     <div className="compact-list">
       <h4>{title}</h4>
       <ul>
-        {splitItems.map((item) => (
-          <li key={item}>{item}</li>
-        ))}
+        {splitItems.map((item) => {
+          const separatorIndex = item.indexOf(':');
+
+          if (separatorIndex === -1) {
+            return <li key={item}>{item}</li>;
+          }
+
+          const label = item.slice(0, separatorIndex);
+          const value = item.slice(separatorIndex + 1).trim();
+
+          return (
+            <li key={item}>
+              <strong>{label}:</strong> {value}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

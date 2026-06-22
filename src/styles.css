@@ -399,7 +399,9 @@ nav {
   position: relative;
   z-index: 1;
   width: min(760px, 100%);
+  margin: 0 auto;
   color: #fff;
+  text-align: center;
   animation: heroRise 720ms ease both;
 }
 
@@ -422,7 +424,7 @@ nav {
 
 .hero-dates {
   width: min(650px, 100%);
-  margin: 24px 0 0;
+  margin: 24px auto 0;
   color: rgba(255, 255, 255, 0.9);
   font-size: clamp(1.1rem, 2vw, 1.55rem);
   line-height: 1.55;
@@ -433,6 +435,7 @@ nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   margin-top: 32px;
 }
