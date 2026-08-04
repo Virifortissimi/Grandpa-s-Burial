@@ -36,9 +36,12 @@ const fallbackHeroImages = [
 ];
 const heroImageUrl =
   'https://res.cloudinary.com/virifortissimi/image/upload/v1782161472/Gramps/ChatGPT_Image_Jun_22_2026_09_48_54_PM.png';
+const mobileHeroImageUrl =
+  'https://res.cloudinary.com/virifortissimi/image/upload/v1785874007/Gramps/ChatGPT_Image_Aug_4_2026_09_06_10_PM.png';
 const optimizeCloudinaryImage = (url, width) =>
   url.replace('/image/upload/', `/image/upload/f_auto,q_auto:good,w_${width},c_limit/`);
 const optimizedHeroImageUrl = optimizeCloudinaryImage(heroImageUrl, 1800);
+const optimizedMobileHeroImageUrl = optimizeCloudinaryImage(mobileHeroImageUrl, 920);
 
 const heroSlides = [
   {
@@ -508,7 +511,13 @@ function MemorialPage() {
       </header>
 
       <main id="top">
-        <section className="hero" style={{ backgroundImage: `url(${currentSlide.image})` }}>
+        <section
+          className="hero"
+          style={{
+            '--hero-image': `url(${currentSlide.image})`,
+            '--mobile-hero-image': `url(${optimizedMobileHeroImageUrl})`
+          }}
+        >
           <div className="hero-overlay" />
           <div className="hero-content">
             <p className="eyebrow">{currentSlide.eyebrow}</p>
@@ -531,6 +540,14 @@ function MemorialPage() {
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
                 {isPlaying ? 'Pause Music' : 'Play Music'}
               </button>
+              <a
+                className="button glass"
+                href="/pdfs/Pa%20Omowaiye%20Burial%20Program.pdf"
+                download="Pa Omowaiye Burial Program.pdf"
+              >
+                <Download size={18} />
+                Download Program
+              </a>
             </div>
             {audioBlocked && (
               <p className="audio-note">

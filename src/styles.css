@@ -391,6 +391,7 @@ nav {
   display: grid;
   align-items: center;
   padding: 120px clamp(18px, 6vw, 80px) 98px;
+  background-image: var(--hero-image);
   background-position: center 28%;
   background-size: cover;
   isolation: isolate;
@@ -1443,7 +1444,8 @@ nav {
     min-height: 650px;
     height: 88vh;
     padding: 144px 16px 112px;
-    background-position: center 24%;
+    background-image: var(--mobile-hero-image);
+    background-position: center top;
   }
 
   .hero h1 {
