@@ -1148,6 +1148,7 @@ function GuestBookForm({ onClose, onSubmitted }) {
 function GuestBookPage() {
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Loading messages…');
   const [error, setError] = useState('');
   const [formOpen, setFormOpen] = useState(false);
 
@@ -1155,18 +1156,49 @@ function GuestBookPage() {
     const controller = new AbortController();
 
     const loadEntries = async () => {
+      const maxAttempts = 3;
+      const wakeUpTimer = window.setTimeout(() => {
+        if (!controller.signal.aborted) {
+          setLoadingMessage('The guest book is waking up… This may take a moment.');
+        }
+      }, 4000);
+
       try {
-        const response = await fetch(`${guestBookApiUrl}?page=1&pageSize=100`, {
-          signal: controller.signal
-        });
-        const payload = await response.json().catch(() => null);
-        if (!response.ok) throw new Error(payload?.errors?.[0] || 'Unable to load the guest book.');
-        setEntries(payload.data || []);
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+          try {
+            const response = await fetch(`${guestBookApiUrl}?page=1&pageSize=100`, {
+              signal: controller.signal
+            });
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok) {
+              const requestError = new Error(
+                payload?.errors?.[0] || 'Unable to load the guest book.'
+              );
+              requestError.retryable = response.status >= 500;
+              throw requestError;
+            }
+
+            setEntries(payload.data || []);
+            setError('');
+            return;
+          } catch (requestError) {
+            if (requestError.name === 'AbortError') throw requestError;
+
+            const shouldRetry = requestError.retryable !== false && attempt < maxAttempts;
+            if (!shouldRetry) throw requestError;
+
+            setLoadingMessage('The guest book is waking up… Retrying automatically.');
+            await new Promise((resolve) => window.setTimeout(resolve, attempt * 2000));
+            if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
+          }
+        }
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
-          setError(loadError.message || 'Unable to load the guest book.');
+          setError('The guest book is taking longer than expected. Please refresh and try again.');
         }
       } finally {
+        window.clearTimeout(wakeUpTimer);
         if (!controller.signal.aborted) setIsLoading(false);
       }
     };
@@ -1201,7 +1233,7 @@ function GuestBookPage() {
           </button>
         </div>
 
-        {isLoading && <div className="guest-book-status">Loading messages…</div>}
+        {isLoading && <div className="guest-book-status">{loadingMessage}</div>}
         {error && <div className="guest-book-status error" role="alert">{error}</div>}
         {!isLoading && !error && entries.length === 0 && (
           <div className="guest-book-status">Be the first to leave a message for the family.</div>
