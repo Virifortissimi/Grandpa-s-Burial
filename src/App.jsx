@@ -159,8 +159,16 @@ const songs = [
   }
 ];
 
-const galleryImages =
-  memorialImages.length > 3 ? memorialImages.slice(3) : memorialImages;
+const shuffleImages = (images) => {
+  const shuffled = [...images];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+
+  return shuffled;
+};
 const memorialSlug = 'julius-omowaye';
 const apiBaseUrl = (
   import.meta.env.VITE_API_BASE_URL ||
@@ -169,6 +177,9 @@ const apiBaseUrl = (
 const guestBookApiUrl = `${apiBaseUrl}/api/v1/guest-book/${memorialSlug}`;
 
 function MemorialPage() {
+  const [galleryImages] = useState(() =>
+    shuffleImages(memorialImages.length > 3 ? memorialImages.slice(3) : memorialImages)
+  );
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeSection, setActiveSection] = useState('watch');
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
