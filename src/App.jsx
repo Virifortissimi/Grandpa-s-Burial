@@ -9,10 +9,8 @@ import {
   Clock,
   Download,
   Heart,
-  Image as ImageIcon,
   MapPin,
   Menu,
-  Music,
   Pause,
   Play,
   Send,
@@ -21,6 +19,9 @@ import {
   X
 } from 'lucide-react';
 import { memorialImages } from './memorialImages';
+import AudioSection from './components/AudioSection';
+import Gallery from './components/Gallery';
+import { optimizeCloudinaryImage } from './utils/media';
 
 const backgroundAudioSrc = '/audio/our-joy-eternally.mp3';
 const zoomMeetingUrl =
@@ -28,18 +29,15 @@ const zoomMeetingUrl =
 const zoomChatUrl = 'https://us06web.zoom.us/launch/jc/83071682622';
 const zoomInstructionsUrl =
   'https://us06web.zoom.us/meetings/83071682622/invitations?signature=ysXP6QFpFHPC4AQsDvkGThsdXVYOmBAMTNWa_VZ3aCI';
-const imagesPerGalleryPage = 20;
 const fallbackHeroImages = [
-  '/images/memorial-bible.png',
-  '/images/memorial-hall.png',
-  '/images/memorial-family.png'
+  '/images/memorial-bible.webp',
+  '/images/memorial-hall.webp',
+  '/images/memorial-family.webp'
 ];
 const heroImageUrl =
   'https://res.cloudinary.com/virifortissimi/image/upload/v1782161472/Gramps/ChatGPT_Image_Jun_22_2026_09_48_54_PM.png';
 const mobileHeroImageUrl =
   'https://res.cloudinary.com/virifortissimi/image/upload/v1785874007/Gramps/ChatGPT_Image_Aug_4_2026_09_06_10_PM.png';
-const optimizeCloudinaryImage = (url, width) =>
-  url.replace('/image/upload/', `/image/upload/f_auto,q_auto:good,w_${width},c_limit/`);
 const optimizedHeroImageUrl = optimizeCloudinaryImage(heroImageUrl, 1800);
 const optimizedMobileHeroImageUrl = optimizeCloudinaryImage(mobileHeroImageUrl, 920);
 
@@ -159,16 +157,6 @@ const songs = [
   }
 ];
 
-const shuffleImages = (images) => {
-  const shuffled = [...images];
-
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
-  }
-
-  return shuffled;
-};
 const memorialSlug = 'julius-omowaye';
 const apiBaseUrl = (
   import.meta.env.VITE_API_BASE_URL ||
@@ -177,13 +165,8 @@ const apiBaseUrl = (
 const guestBookApiUrl = `${apiBaseUrl}/api/v1/guest-book/${memorialSlug}`;
 
 function MemorialPage() {
-  const [galleryImages] = useState(() =>
-    shuffleImages(memorialImages.length > 3 ? memorialImages.slice(3) : memorialImages)
-  );
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeSection, setActiveSection] = useState('watch');
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [galleryPage, setGalleryPage] = useState(1);
   const [navOpen, setNavOpen] = useState(false);
   const [accessOpen, setAccessOpen] = useState(false);
   const [guestFormOpen, setGuestFormOpen] = useState(false);
@@ -253,7 +236,7 @@ function MemorialPage() {
     }, 60);
 
     return () => window.clearTimeout(refreshTimer);
-  }, [accessibility.reduceMotion, galleryPage]);
+  }, [accessibility.reduceMotion]);
 
   useEffect(() => {
     localStorage.setItem('themeMode', themeMode);
@@ -296,19 +279,6 @@ function MemorialPage() {
   }, []);
 
   useEffect(() => {
-    if (selectedImageIndex === null) return;
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') closeGallery();
-      if (event.key === 'ArrowRight') nextGalleryImage();
-      if (event.key === 'ArrowLeft') previousGalleryImage();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedImageIndex]);
-
-  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -317,31 +287,10 @@ function MemorialPage() {
   }, []);
 
   const currentSlide = heroSlides[activeSlide];
-  const selectedImage =
-    selectedImageIndex === null ? null : galleryImages[selectedImageIndex];
-  const totalGalleryPages = Math.max(1, Math.ceil(galleryImages.length / imagesPerGalleryPage));
-  const safeGalleryPage = Math.min(galleryPage, totalGalleryPages);
-  const visibleGalleryImages = galleryImages.slice(
-    (safeGalleryPage - 1) * imagesPerGalleryPage,
-    safeGalleryPage * imagesPerGalleryPage
-  );
 
   const nextSlide = () => setActiveSlide((current) => (current + 1) % heroSlides.length);
   const previousSlide = () =>
     setActiveSlide((current) => (current - 1 + heroSlides.length) % heroSlides.length);
-  const closeGallery = () => setSelectedImageIndex(null);
-  const nextGalleryImage = () =>
-    setSelectedImageIndex((current) =>
-      current === null ? 0 : (current + 1) % galleryImages.length
-    );
-  const previousGalleryImage = () =>
-    setSelectedImageIndex((current) =>
-      current === null ? galleryImages.length - 1 : (current - 1 + galleryImages.length) % galleryImages.length
-    );
-  const goToGalleryPage = (page) => {
-    setGalleryPage(Math.min(Math.max(page, 1), totalGalleryPages));
-  };
-
   const toggleAudio = async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -557,7 +506,7 @@ function MemorialPage() {
                 download="Pa Omowaiye Burial Program.pdf"
               >
                 <Download size={18} />
-                Download Program
+                Download Program (PDF, 1.01 MB)
               </a>
             </div>
             {audioBlocked && (
@@ -837,91 +786,9 @@ function MemorialPage() {
           </div>
         </section>
 
-        <section id="pictures" className="section gallery-section">
-          <div className="section-heading">
-            <p className="eyebrow">Pictures to Remember</p>
-            <h2>Memories of Julius</h2>
-            <p>Click any image for a full view.</p>
-          </div>
-          <div className="gallery-grid" data-aos="smooth-up">
-            {visibleGalleryImages.map((image, index) => {
-              const imageIndex = (safeGalleryPage - 1) * imagesPerGalleryPage + index;
-              return (
-                <button
-                  className="gallery-item"
-                  key={`${image.title}-${imageIndex}`}
-                  type="button"
-                  onClick={() => setSelectedImageIndex(imageIndex)}
-                >
-                  <img
-                    src={optimizeCloudinaryImage(image.src, 640)}
-                    alt={image.title}
-                    loading="lazy"
-                    decoding="async"
-                    width="640"
-                    height="640"
-                  />
-                  <span>
-                    <ImageIcon size={16} />
-                    View Photo
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {totalGalleryPages > 1 && (
-            <div className="pagination" aria-label="Gallery pagination">
-              <button
-                type="button"
-                onClick={() => goToGalleryPage(safeGalleryPage - 1)}
-                disabled={safeGalleryPage === 1}
-              >
-                Previous
-              </button>
-              <span>
-                Page {safeGalleryPage} of {totalGalleryPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => goToGalleryPage(safeGalleryPage + 1)}
-                disabled={safeGalleryPage === totalGalleryPages}
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </section>
+        <Gallery images={memorialImages} reduceMotion={accessibility.reduceMotion} />
 
-        <section className="section songs-section">
-          <div className="section-heading">
-            <p className="eyebrow">Songs of Comfort</p>
-            <h2>Music for reflection</h2>
-          </div>
-          <div className="song-grid" data-aos="smooth-up">
-            {songs.map((song, index) => (
-              <article className="song-card" key={song.src}>
-                <div>
-                  <Music size={20} />
-                  <span>
-                    <strong>{song.title}</strong>
-                    <small>{song.subtitle}</small>
-                  </span>
-                </div>
-                <audio
-                  ref={(element) => {
-                    songRefs.current[index] = element;
-                  }}
-                  controls
-                  preload="metadata"
-                  src={song.src}
-                  onPlay={() => handleSongPlay(index)}
-                >
-                  <a href={song.src}>Play {song.title}</a>
-                </audio>
-              </article>
-            ))}
-          </div>
-        </section>
+        <AudioSection songs={songs} songRefs={songRefs} onSongPlay={handleSongPlay} />
 
         <section id="acknowledgments" className="section acknowledgments" data-aos="smooth-up">
           <div>
@@ -946,47 +813,6 @@ function MemorialPage() {
         <p>In Loving Memory of Julius Oladimeji Omowaye</p>
         <a href="#top">Back to top</a>
       </footer>
-
-      {selectedImage && (
-        <div className="modal" role="dialog" aria-modal="true" aria-label={selectedImage.title}>
-          <button className="modal-backdrop" type="button" onClick={closeGallery} />
-          <div className="modal-content">
-            <button
-              className="gallery-nav previous"
-              type="button"
-              onClick={previousGalleryImage}
-              aria-label="Previous picture"
-            >
-              <ChevronLeft size={26} />
-            </button>
-            <img src={selectedImage.src} alt={selectedImage.title} />
-            <button
-              className="gallery-nav next"
-              type="button"
-              onClick={nextGalleryImage}
-              aria-label="Next picture"
-            >
-              <ChevronRight size={26} />
-            </button>
-            <div className="modal-actions">
-              <div>
-                <h3>Photo Memory</h3>
-                <p>
-                  Picture {(selectedImageIndex ?? 0) + 1} of {galleryImages.length}.{' '}
-                  {selectedImage.note}
-                </p>
-              </div>
-              <a className="button secondary" href={selectedImage.src} download>
-                <Download size={18} />
-                Download
-              </a>
-              <button className="button primary" type="button" onClick={closeGallery}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {guestFormOpen && (
         <GuestBookForm
@@ -1088,6 +914,7 @@ function LandingPage() {
 function GuestBookForm({ onClose, onSubmitted }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [submissionMessage, setSubmissionMessage] = useState('');
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -1100,29 +927,57 @@ function GuestBookForm({ onClose, onSubmitted }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+    setSubmissionMessage('Submitting your message…');
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
+    const requestBody = JSON.stringify({
+      name: formData.get('name')?.toString().trim(),
+      message: formData.get('message')?.toString().trim(),
+      website: formData.get('website')?.toString()
+    });
+    const maxAttempts = 3;
 
     try {
-      const response = await fetch(guestBookApiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.get('name')?.toString().trim(),
-          message: formData.get('message')?.toString().trim(),
-          website: formData.get('website')?.toString()
-        })
-      });
-      const payload = await response.json().catch(() => null);
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+          const response = await fetch(guestBookApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: requestBody
+          });
+          const payload = await response.json().catch(() => null);
 
-      if (!response.ok) {
-        throw new Error(payload?.errors?.[0] || 'Unable to submit your message right now.');
+          if (!response.ok) {
+            const submissionError = new Error(
+              payload?.errors?.[0] || 'Unable to submit your message right now.'
+            );
+            submissionError.retryable =
+              response.status === 408 || response.status === 425 ||
+              response.status === 429 || response.status >= 500;
+            throw submissionError;
+          }
+
+          setSubmissionMessage('Message submitted successfully.');
+          onSubmitted(payload.data);
+          return;
+        } catch (submissionError) {
+          const shouldRetry = submissionError.retryable !== false && attempt < maxAttempts;
+          if (!shouldRetry) throw submissionError;
+
+          const retryDelaySeconds = attempt * 2;
+          setSubmissionMessage(
+            `The guest book is waking up. Retrying automatically in ${retryDelaySeconds} seconds…`
+          );
+          await new Promise((resolve) =>
+            window.setTimeout(resolve, retryDelaySeconds * 1000)
+          );
+          setSubmissionMessage(`Retrying submission (${attempt + 1} of ${maxAttempts})…`);
+        }
       }
-
-      onSubmitted(payload.data);
     } catch (submissionError) {
       setError(submissionError.message || 'Unable to submit your message right now.');
+      setSubmissionMessage('');
     } finally {
       setIsSubmitting(false);
     }
@@ -1157,6 +1012,11 @@ function GuestBookForm({ onClose, onSubmitted }) {
             Website
             <input name="website" type="text" tabIndex="-1" autoComplete="off" />
           </label>
+          {submissionMessage && (
+            <p className="form-status" role="status" aria-live="polite">
+              {submissionMessage}
+            </p>
+          )}
           {error && <p className="form-error" role="alert">{error}</p>}
           <div className="guest-form-actions">
             <button className="button secondary" type="button" onClick={onClose} disabled={isSubmitting}>

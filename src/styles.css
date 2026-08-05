@@ -1839,6 +1839,15 @@ nav {
   line-height: 1.45;
 }
 
+.form-status {
+  margin: 0;
+  border-radius: 10px;
+  padding: 11px 13px;
+  background: rgba(47, 117, 184, 0.1);
+  color: var(--ink);
+  line-height: 1.45;
+}
+
 .guest-book-page {
   min-height: 100vh;
   background:
