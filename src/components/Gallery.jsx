@@ -17,6 +17,12 @@ export default function Gallery({ images, reduceMotion }) {
 
   const isOpen = selectedIndex !== null;
   const selectedImage = selectedIndex === null ? null : galleryImages[selectedIndex];
+  const previousImage = selectedIndex === null
+    ? null
+    : galleryImages[(selectedIndex - 1 + galleryImages.length) % galleryImages.length];
+  const nextImage = selectedIndex === null
+    ? null
+    : galleryImages[(selectedIndex + 1) % galleryImages.length];
   const totalPages = Math.max(1, Math.ceil(galleryImages.length / imagesPerPage));
   const safePage = Math.min(page, totalPages);
   const visibleImages = galleryImages.slice(
@@ -40,6 +46,18 @@ export default function Gallery({ images, reduceMotion }) {
   useEffect(() => {
     if (!reduceMotion) AOS.refresh();
   }, [page, reduceMotion]);
+
+  useEffect(() => {
+    if (!selectedImage) return undefined;
+
+    const preloads = [previousImage, nextImage].map((image) => {
+      const preload = new Image();
+      preload.src = optimizeCloudinaryImage(image.src, 1800);
+      return preload;
+    });
+
+    return () => preloads.forEach((preload) => { preload.src = ''; });
+  }, [nextImage, previousImage, selectedImage]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -114,6 +132,8 @@ export default function Gallery({ images, reduceMotion }) {
               >
                 <img
                   src={optimizeCloudinaryImage(image.src, 640)}
+                  srcSet={`${optimizeCloudinaryImage(image.src, 360)} 360w, ${optimizeCloudinaryImage(image.src, 640)} 640w, ${optimizeCloudinaryImage(image.src, 960)} 960w`}
+                  sizes="(max-width: 620px) 100vw, (max-width: 980px) 50vw, 33vw"
                   alt={image.title}
                   loading="lazy"
                   decoding="async"
@@ -151,7 +171,12 @@ export default function Gallery({ images, reduceMotion }) {
             <button className="gallery-nav previous" type="button" onClick={previous} aria-label="Previous picture">
               <ChevronLeft size={26} />
             </button>
-            <img src={selectedImage.src} alt={selectedImage.title} />
+            <img
+              src={optimizeCloudinaryImage(selectedImage.src, 1800)}
+              srcSet={`${optimizeCloudinaryImage(selectedImage.src, 960)} 960w, ${optimizeCloudinaryImage(selectedImage.src, 1400)} 1400w, ${optimizeCloudinaryImage(selectedImage.src, 1800)} 1800w`}
+              sizes="100vw"
+              alt={selectedImage.title}
+            />
             <button className="gallery-nav next" type="button" onClick={next} aria-label="Next picture">
               <ChevronRight size={26} />
             </button>

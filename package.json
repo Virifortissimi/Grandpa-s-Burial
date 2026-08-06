@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
+    "check": "npm run build && node scripts/check-build.mjs",
+    "test:a11y": "vitest run --environment jsdom src/components/Accessibility.test.jsx",
+    "lighthouse": "lhci autorun",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
@@ -15,5 +18,12 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "vite": "^7.3.0"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "@testing-library/react": "^16.3.2",
+    "axe-core": "^4.13.0",
+    "jsdom": "^30.0.1",
+    "vitest": "^4.1.10"
   }
 }

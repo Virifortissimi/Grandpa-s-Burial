@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import {
@@ -19,9 +19,11 @@ import {
   X
 } from 'lucide-react';
 import { memorialImages } from './memorialImages';
-import AudioSection from './components/AudioSection';
-import Gallery from './components/Gallery';
 import { optimizeCloudinaryImage } from './utils/media';
+import { fetchWithTimeout } from './utils/network';
+
+const AudioSection = lazy(() => import('./components/AudioSection'));
+const Gallery = lazy(() => import('./components/Gallery'));
 
 const backgroundAudioSrc = '/audio/our-joy-eternally.mp3';
 const zoomMeetingUrl =
@@ -786,9 +788,13 @@ function MemorialPage() {
           </div>
         </section>
 
-        <Gallery images={memorialImages} reduceMotion={accessibility.reduceMotion} />
+        <Suspense fallback={<div className="section-loading" role="status">Loading memories…</div>}>
+          <Gallery images={memorialImages} reduceMotion={accessibility.reduceMotion} />
+        </Suspense>
 
-        <AudioSection songs={songs} songRefs={songRefs} onSongPlay={handleSongPlay} />
+        <Suspense fallback={<div className="section-loading" role="status">Loading music…</div>}>
+          <AudioSection songs={songs} songRefs={songRefs} onSongPlay={handleSongPlay} />
+        </Suspense>
 
         <section id="acknowledgments" className="section acknowledgments" data-aos="smooth-up">
           <div>
@@ -936,16 +942,20 @@ function GuestBookForm({ onClose, onSubmitted }) {
       message: formData.get('message')?.toString().trim(),
       website: formData.get('website')?.toString()
     });
+    const idempotencyKey = crypto.randomUUID();
     const maxAttempts = 3;
 
     try {
       for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         try {
-          const response = await fetch(guestBookApiUrl, {
+          const response = await fetchWithTimeout(guestBookApiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey
+            },
             body: requestBody
-          });
+          }, 30000);
           const payload = await response.json().catch(() => null);
 
           if (!response.ok) {
@@ -1036,9 +1046,13 @@ function GuestBookForm({ onClose, onSubmitted }) {
 function GuestBookPage() {
   const [entries, setEntries] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Loading messages…');
   const [error, setError] = useState('');
   const [formOpen, setFormOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1054,9 +1068,9 @@ function GuestBookPage() {
       try {
         for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
           try {
-            const response = await fetch(`${guestBookApiUrl}?page=1&pageSize=100`, {
+            const response = await fetchWithTimeout(`${guestBookApiUrl}?page=${page}&pageSize=20`, {
               signal: controller.signal
-            });
+            }, 30000);
             const payload = await response.json().catch(() => null);
 
             if (!response.ok) {
@@ -1067,7 +1081,12 @@ function GuestBookPage() {
               throw requestError;
             }
 
-            setEntries(payload.data || []);
+            const nextEntries = payload.data || [];
+            setEntries((current) => page === 1 ? nextEntries : [
+              ...current,
+              ...nextEntries.filter((entry) => !current.some((existing) => existing.id === entry.id))
+            ]);
+            setHasMore(page < (payload.meta?.totalPages || 1));
             setError('');
             return;
           } catch (requestError) {
@@ -1087,13 +1106,16 @@ function GuestBookPage() {
         }
       } finally {
         window.clearTimeout(wakeUpTimer);
-        if (!controller.signal.aborted) setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+          setIsLoadingMore(false);
+        }
       }
     };
 
     loadEntries();
     return () => controller.abort();
-  }, []);
+  }, [page, reloadKey]);
 
   return (
     <div className="guest-book-page">
@@ -1122,7 +1144,24 @@ function GuestBookPage() {
         </div>
 
         {isLoading && <div className="guest-book-status">{loadingMessage}</div>}
-        {error && <div className="guest-book-status error" role="alert">{error}</div>}
+        {error && (
+          <div className="guest-book-status error" role="alert">
+            <p>{error}</p>
+            <button
+              className="button secondary"
+              type="button"
+              onClick={() => {
+                setError('');
+                setIsLoading(true);
+                setLoadingMessage('Loading messages…');
+                setPage(1);
+                setReloadKey((current) => current + 1);
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        )}
         {!isLoading && !error && entries.length === 0 && (
           <div className="guest-book-status">Be the first to leave a message for the family.</div>
         )}
@@ -1141,6 +1180,21 @@ function GuestBookPage() {
             </article>
           ))}
         </div>
+        {!isLoading && !error && hasMore && (
+          <div className="guest-book-load-more">
+            <button
+              className="button secondary"
+              type="button"
+              disabled={isLoadingMore}
+              onClick={() => {
+                setIsLoadingMore(true);
+                setPage((current) => current + 1);
+              }}
+            >
+              {isLoadingMore ? 'Loading more…' : 'Load more messages'}
+            </button>
+          </div>
+        )}
       </main>
 
       {formOpen && (
