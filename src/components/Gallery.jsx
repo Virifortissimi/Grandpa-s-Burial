@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import AOS from 'aos';
 import { ChevronLeft, ChevronRight, Download, Image as ImageIcon } from 'lucide-react';
 import { optimizeCloudinaryImage, shuffleImages } from '../utils/media';
 
@@ -7,7 +6,7 @@ const imagesPerPage = 20;
 const focusableSelector =
   'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export default function Gallery({ images, reduceMotion }) {
+export default function Gallery({ images }) {
   const [galleryImages] = useState(() => shuffleImages(images));
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [page, setPage] = useState(1);
@@ -42,10 +41,6 @@ export default function Gallery({ images, reduceMotion }) {
         : (current - 1 + galleryImages.length) % galleryImages.length
     );
   const goToPage = (nextPage) => setPage(Math.min(Math.max(nextPage, 1), totalPages));
-
-  useEffect(() => {
-    if (!reduceMotion) AOS.refresh();
-  }, [page, reduceMotion]);
 
   useEffect(() => {
     if (!selectedImage) return undefined;
@@ -120,7 +115,7 @@ export default function Gallery({ images, reduceMotion }) {
           <h2>Memories of Julius</h2>
           <p>Click any image for a full view.</p>
         </div>
-        <div className="gallery-grid" data-aos="smooth-up">
+        <div className="gallery-grid">
           {visibleImages.map((image, index) => {
             const imageIndex = (safePage - 1) * imagesPerPage + index;
             return (
@@ -139,6 +134,13 @@ export default function Gallery({ images, reduceMotion }) {
                   decoding="async"
                   width="640"
                   height="640"
+                  onError={(event) => {
+                    const imageElement = event.currentTarget;
+                    if (imageElement.src !== image.src) {
+                      imageElement.removeAttribute('srcset');
+                      imageElement.src = image.src;
+                    }
+                  }}
                 />
                 <span><ImageIcon size={16} />View Photo</span>
               </button>
@@ -176,6 +178,13 @@ export default function Gallery({ images, reduceMotion }) {
               srcSet={`${optimizeCloudinaryImage(selectedImage.src, 960)} 960w, ${optimizeCloudinaryImage(selectedImage.src, 1400)} 1400w, ${optimizeCloudinaryImage(selectedImage.src, 1800)} 1800w`}
               sizes="100vw"
               alt={selectedImage.title}
+              onError={(event) => {
+                const imageElement = event.currentTarget;
+                if (imageElement.src !== selectedImage.src) {
+                  imageElement.removeAttribute('srcset');
+                  imageElement.src = selectedImage.src;
+                }
+              }}
             />
             <button className="gallery-nav next" type="button" onClick={next} aria-label="Next picture">
               <ChevronRight size={26} />

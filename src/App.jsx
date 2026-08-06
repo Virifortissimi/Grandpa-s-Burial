@@ -789,7 +789,7 @@ function MemorialPage() {
         </section>
 
         <Suspense fallback={<div className="section-loading" role="status">Loading memories…</div>}>
-          <Gallery images={memorialImages} reduceMotion={accessibility.reduceMotion} />
+          <Gallery images={memorialImages} />
         </Suspense>
 
         <Suspense fallback={<div className="section-loading" role="status">Loading music…</div>}>
@@ -802,14 +802,19 @@ function MemorialPage() {
             <h2>With deep appreciation</h2>
           </div>
           <p>
-            The Omowaye family would like to thank each of you for all the support,
-            encouragement, empathy, calls, and love you have shown during this very difficult
-            time.
+            The Omowaye family wishes to express heartfelt gratitude to everyone who has
+            supported us during this difficult time. Your prayers, words of comfort, visits,
+            phone calls, messages, and acts of kindness have brought us strength and
+            encouragement as we mourn the loss of our beloved father, grandfather,
+            great-grandfather, and great-great-grandfather.
           </p>
           <p>
-            We truly feel Jehovah has blessed us with such loving friends and used you to
-            comfort and sustain us. Thank you for every act of care and kindness, every
-            expression of sympathy, and most especially, every prayer on our behalf.
+            We sincerely thank our relatives, friends, neighbours, colleagues, and our dear
+            brothers and sisters in the congregation for your prayers, comforting words,
+            visits, messages, practical assistance, and every expression of love. Your
+            compassion and generosity have been a great source of comfort. May Jehovah God
+            richly bless you for your love, kindness, and unwavering support, and remember
+            you for good — Nehemiah 5:19a.
           </p>
           <p>We appreciate you more than words can say.</p>
         </section>
