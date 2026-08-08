@@ -188,5 +188,25 @@ export const memorialImages = [
     src: 'https://res.cloudinary.com/virifortissimi/image/upload/v1785876275/Gramps/WhatsApp_Image_2026-05-31_at_23.12.53.jpg',
     title: 'Memory 38',
     note: 'A cherished memory of Julius.'
+  },
+  {
+    src: 'https://res.cloudinary.com/virifortissimi/image/upload/v1786212877/Gramps/WhatsApp_Image_2026-08-07_at_10.14.40.jpg',
+    title: 'Memory 39',
+    note: 'A cherished memory of Julius.'
+  },
+  {
+    src: 'https://res.cloudinary.com/virifortissimi/image/upload/v1786212878/Gramps/WhatsApp_Image_2026-08-07_at_10.14.40_3.jpg',
+    title: 'Memory 40',
+    note: 'A cherished memory of Julius.'
+  },
+  {
+    src: 'https://res.cloudinary.com/virifortissimi/image/upload/v1786212877/Gramps/WhatsApp_Image_2026-08-07_at_10.14.40_2.jpg',
+    title: 'Memory 41',
+    note: 'A cherished memory of Julius.'
+  },
+  {
+    src: 'https://res.cloudinary.com/virifortissimi/image/upload/v1786212880/Gramps/WhatsApp_Image_2026-08-07_at_10.14.40_4.jpg',
+    title: 'Memory 42',
+    note: 'A cherished memory of Julius.'
   }
 ];
